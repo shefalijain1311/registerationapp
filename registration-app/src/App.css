@@ -1,0 +1,14 @@
+/* Ensure full height */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Gradient background */
+.homepage-bg {
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #a855f7, #000000); /* Purple to black */
+  background-repeat: no-repeat;
+  background-size: cover;
+}
