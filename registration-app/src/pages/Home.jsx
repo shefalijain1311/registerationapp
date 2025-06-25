@@ -7,6 +7,9 @@ export default function Home() {
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth();
 
+  console.log('Home component - isAuthenticated:', isAuthenticated);
+  console.log('Home component - user:', user);
+
   const handleLogout = () => {
     logout();
     navigate('/');

@@ -18,16 +18,26 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     setLoading(true);
     try {
+      console.log('AuthContext: Making login request with:', credentials);
       const response = await authAPI.login(credentials);
-      setToken(response.token);
-      setUser(response.user);
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      return { success: true };
+      console.log('AuthContext: Login response:', response);
+      
+      if (response && response.token) {
+        setToken(response.token);
+        setUser(response.user);
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        console.log('AuthContext: Login successful, stored token and user');
+        return { success: true };
+      } else {
+        console.log('AuthContext: No token in response');
+        return { success: false, message: 'No token received' };
+      }
     } catch (error) {
+      console.error('AuthContext: Login error:', error);
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Login failed' 
+        message: error.response?.data?.message || error.message || 'Login failed' 
       };
     } finally {
       setLoading(false);

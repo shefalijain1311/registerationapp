@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/Login.css";
@@ -12,14 +12,24 @@ export default function Login() {
     password: ''
   });
   const [errors, setErrors] = useState({});
+  const hasRedirected = useRef(false);
   
   const { pushPage } = usePageStack();
-  const { login, loading } = useAuth();
+  const { login, loading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     pushPage("Login");
   }, [pushPage]);
+
+  useEffect(() => {
+    // Redirect if already authenticated
+    if (isAuthenticated && !hasRedirected.current) {
+      console.log('User already authenticated, redirecting to home');
+      hasRedirected.current = true;
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -59,11 +69,37 @@ export default function Login() {
       return;
     }
 
+    console.log('Attempting login with:', formData);
     const result = await login(formData);
+    console.log('Login result:', result);
 
     if (result.success) {
-      navigate('/'); // Redirect to home or dashboard
+      console.log('Login successful, navigating to /');
+      console.log('Current URL before navigation:', window.location.href);
+      
+      // Try multiple navigation approaches
+      try {
+        navigate('/', { replace: true });
+        
+        // Fallback with window.location if navigate doesn't work
+        setTimeout(() => {
+          if (window.location.pathname !== '/') {
+            console.log('React Router navigation failed, using window.location');
+            window.location.href = '/';
+          }
+        }, 200);
+        
+      } catch (navError) {
+        console.error('Navigation error:', navError);
+        window.location.href = '/';
+      }
+      
+      // Also log after navigation attempt
+      setTimeout(() => {
+        console.log('URL after navigation attempt:', window.location.href);
+      }, 100);
     } else {
+      console.log('Login failed:', result.message);
       setErrors({ submit: result.message });
     }
   };
